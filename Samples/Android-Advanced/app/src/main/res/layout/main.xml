@@ -55,6 +55,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/send_push"/>
+
             </LinearLayout>
 
             <LinearLayout
@@ -78,6 +79,22 @@
                     android:textOn="@string/beacon_pushes_on"
                     android:textOff="@string/beacon_pushes_off" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/register_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Register Intercom"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:id="@+id/show_conversations_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Show Conversations"
+                android:layout_gravity="center_horizontal" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

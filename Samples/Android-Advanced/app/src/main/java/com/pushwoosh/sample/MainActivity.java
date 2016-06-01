@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,12 +23,25 @@ import com.pushwoosh.PushManager.RichPageListener;
 import com.pushwoosh.BasePushMessageReceiver;
 import com.pushwoosh.BaseRegistrationReceiver;
 
+import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.identity.Registration;
+
 public class MainActivity extends Activity
 {
 	private TextView mGeneralStatus;
 	private Button mSendPushButton;
 	private ToggleButton mGeoPushButton;
 	private ToggleButton mBeaconPushButton;
+	//YOU MUST USE ONE OF THESE TO CREATE A SESSION
+	private static final String YOUR_EMAIL = "";
+	private static final String YOUR_USER_ID = "";
+
+	//IF YOU USE SECURE MODE YOU WILL NEED TO INCLUDE H_MAC AND DATA
+	//I WOULD TAKE THE VALUES FROM YOUR ACTUAL APP
+	private static final String YOUR_HMAC = "";
+	private static final String YOUR_DATA = "";
+	private Button registerButton;
+	private Button convoButton;
 
 	/**
 	 * Called when the activity is first created.
@@ -36,6 +50,7 @@ public class MainActivity extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Intercom.client().openGCMMessage(getIntent());
 
 		setContentView(R.layout.main);
 
@@ -64,6 +79,40 @@ public class MainActivity extends Activity
 		});
 
 		initPushwoosh();
+
+
+		convoButton = (Button) findViewById(R.id.show_conversations_button);
+		convoButton.setOnClickListener(new View.OnClickListener() {
+										   @Override
+										   public void onClick(View v) {
+											   Intercom.client().displayConversationsList();
+										   }
+									   });
+
+		registerButton = (Button) findViewById(R.id.register_button);
+		registerButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Registration registration = Registration.create();
+				if (!TextUtils.isEmpty(YOUR_USER_ID)) {
+					registration.withUserId(YOUR_USER_ID);
+				}
+				if (!TextUtils.isEmpty(YOUR_EMAIL)) {
+					registration.withEmail(YOUR_EMAIL);
+				}
+				Intercom.client().registerIdentifiedUser(registration);
+
+				registerButton.setEnabled(false);
+				//setUpPush();
+				Log.d("Intercom", "Token: " + registrationId);
+				Intercom.client().setupGCM(registrationId, R.mipmap.ic_sdk);
+			}
+		});
+
+		//if you have provided a hmac and data try begin secure session
+		if (!TextUtils.isEmpty(YOUR_HMAC) && !TextUtils.isEmpty(YOUR_DATA)) {
+			Intercom.client().setSecureMode(YOUR_HMAC, YOUR_DATA);
+		}
 	}
 
 	private void initPushwoosh()
@@ -273,10 +322,11 @@ public class MainActivity extends Activity
 			resetIntentValues();
 		}
 	}
-
+	String registrationId;
 	public void doOnRegistered(String registrationId)
 	{
 		mGeneralStatus.setText(getString(R.string.registered, registrationId));
+		this.registrationId = registrationId;
 		mSendPushButton.setEnabled(true);
 	}
 
